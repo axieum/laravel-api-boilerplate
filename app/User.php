@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Silber\Bouncer\Database\HasRolesAndAbilities;
@@ -36,4 +37,16 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Scope a query to only include verified users.
+     *
+     * @param Builder $query
+     * @param bool    $verified
+     * @return Builder
+     */
+    public function scopeVerified(Builder $query, $verified = true)
+    {
+        return $this->{$verified ? 'whereNotNull' : 'whereNull'}('email_verified_at');
+    }
 }
