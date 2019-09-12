@@ -1,0 +1,32 @@
+email@example.com                                                       ,1
+firstname.lastname@example.com                                          ,1
+email@subdomain.example.com                                             ,1
+firstname+lastname@example.com                                          ,1
+email@123.123.123.123                                                   ,1
+email@[123.123.123.123]                                                 ,1
+“email”@example.com                                                     ,1
+1234567890@example.com                                                  ,1
+email@example-one.com                                                   ,1
+_______@example.com                                                     ,1
+email@example.name                                                      ,1
+email@example.museum                                                    ,1
+email@example.co.jp                                                     ,1
+firstname-lastname@example.com                                          ,1
+much.“more\ unusual”@example.com                                        ,1
+very.unusual.“@”.unusual.com@example.com                                ,1
+"very.""(),:;<>[]"".VERY.""very@\\ ""very"".unusual@strange.example.com",1
+plainaddress                                                            ,0
+#@%^%#$@#$@#.com                                                        ,0
+@example.com                                                            ,0
+Joe Smith <email@example.com>                                           ,0
+email.example.com                                                       ,0
+email@example@example.com                                               ,0
+.email@example.com                                                      ,0
+email.@example.com                                                      ,0
+email..email@example.com                                                ,0
+email@-example.com                                                      ,0
+email@example..com                                                      ,0
+Abc..123@example.com                                                    ,0
+"""(),:;<>[\]@example.com"                                              ,0
+"just""not""right@example.com"                                          ,0
+"this\ is""really""not\allowed@example.com"                             ,0

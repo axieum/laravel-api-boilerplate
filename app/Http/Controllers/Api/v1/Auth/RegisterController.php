@@ -1,10 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\Api\v1\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\v1\User as UserResource;
 use App\User;
+use Illuminate\Auth\Events\Registered as RegisteredEvent;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -22,13 +26,6 @@ class RegisterController extends Controller
     */
 
     use RegistersUsers;
-
-    /**
-     * Where to redirect users after registration.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/home';
 
     /**
      * Create a new controller instance.
@@ -52,6 +49,7 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'agreement' => ['required', 'accepted'],
         ]);
     }
 
@@ -68,5 +66,22 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+    }
+
+    /**
+     * The user has been registered.
+     *
+     * @param Request $request
+     * @param mixed   $user
+     * @return mixed
+     */
+    protected function registered(Request $request, $user)
+    {
+        event(new RegisteredEvent($user));
+
+        return response()->json([
+            'message' => __('auth.registered'),
+            'user' => new UserResource($user)
+        ], Response::HTTP_CREATED);
     }
 }

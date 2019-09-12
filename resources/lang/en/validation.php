@@ -129,8 +129,8 @@ return [
     */
 
     'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
+        'email' => [
+            'unique' => 'The :attribute is already in use.',
         ],
     ],
 
@@ -145,6 +145,8 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'agreement' => 'terms and conditions',
+    ],
 
 ];
