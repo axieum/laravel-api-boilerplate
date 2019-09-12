@@ -5,7 +5,7 @@ namespace App\Http\Resources\v1;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
+use Silber\Bouncer\BouncerFacade as Bouncer;
 
 /**
  * User JSON Resource.
@@ -29,7 +29,7 @@ class User extends JsonResource
     public function toArray($request)
     {
         $canSeeEmail = $this->resource->wasRecentlyCreated ||
-            $this->resource->getKey() == Auth::id();
+            Bouncer::can('view.email', $this->resource);
 
         return [
             'id' => $this->id,

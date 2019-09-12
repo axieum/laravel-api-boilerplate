@@ -85,4 +85,21 @@ class UserTest extends TestCase
         self::createTestResponse((new UserResource($user))->response())
             ->assertJson(['data' => ['email' => $user->email]]);
     }
+
+    /** @test */
+    public function can_see_email_with_ability()
+    {
+        /** @var User $passive user whom is being viewed */
+        $passive = factory('App\User')->create();
+        $passive->wasRecentlyCreated = false;
+
+        /** @var User $active user whom is viewing passive user */
+        $active = factory('App\User')->create();
+        $active->allow('view.email', $passive);
+
+        self::actingAs($active);
+        /** @noinspection PhpParamsInspection */
+        self::createTestResponse((new UserResource($passive))->response())
+            ->assertJson(['data' => ['email' => $passive->email]]);
+    }
 }

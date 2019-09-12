@@ -9,10 +9,11 @@
     "license": "MIT",
     "require": {
         "php": "^7.2",
+        "ext-pdo": "*",
         "fideloper/proxy": "^4.0",
         "laravel/framework": "^6.0",
         "laravel/tinker": "^1.0",
-        "ext-pdo": "*"
+        "silber/bouncer": "v1.0.0-rc.6"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.6",

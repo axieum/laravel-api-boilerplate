@@ -28,6 +28,7 @@ class Bootstrap implements BeforeFirstTestHook, AfterLastTestHook
         $commands = [
             'config:cache',
             'event:cache',
+            'db:seed --class=PermissionSeeder', // seed Bouncer permissions
         ];
 
         foreach ($commands as $command) {
