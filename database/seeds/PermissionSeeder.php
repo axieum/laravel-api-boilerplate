@@ -2,6 +2,7 @@
 
 use App\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Notifications\DatabaseNotification;
 use Silber\Bouncer\BouncerFacade as Bouncer;
 
 class PermissionSeeder extends Seeder
@@ -25,5 +26,8 @@ class PermissionSeeder extends Seeder
         Bouncer::allowEveryone()->to(['view'], User::class);
         Bouncer::allowEveryone()->toOwn(User::class)
             ->to(['update', 'delete', 'view.email']);
+
+        Bouncer::allowEveryone()->toOwn(DatabaseNotification::class)
+            ->to(['read', 'delete']);
     }
 }
