@@ -13,7 +13,9 @@
         "fideloper/proxy": "^4.0",
         "laravel/framework": "^6.0",
         "laravel/tinker": "^1.0",
-        "silber/bouncer": "v1.0.0-rc.6"
+        "silber/bouncer": "v1.0.0-rc.6",
+        "spatie/laravel-json-api-paginate": "^1.6",
+        "spatie/laravel-query-builder": "^2.1"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.6",
