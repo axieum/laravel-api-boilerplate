@@ -42,11 +42,11 @@ class User extends Authenticatable
      * Scope a query to only include verified users.
      *
      * @param Builder $query
-     * @param bool    $verified
+     * @param mixed   $verified
      * @return Builder
      */
     public function scopeVerified(Builder $query, $verified = true)
     {
-        return $this->{$verified ? 'whereNotNull' : 'whereNull'}('email_verified_at');
+        return $query->{$verified ? 'whereNotNull' : 'whereNull'}('email_verified_at');
     }
 }
