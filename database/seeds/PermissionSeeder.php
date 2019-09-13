@@ -25,7 +25,8 @@ class PermissionSeeder extends Seeder
         // Everyone
         Bouncer::allowEveryone()->to(['view'], User::class);
         Bouncer::allowEveryone()->toOwn(User::class)
-            ->to(['update', 'delete', 'view.email']);
+            ->to(['update', 'delete', 'view.email', 'index.notification',
+                'index.role', 'index.ability']);
 
         Bouncer::allowEveryone()->toOwn(DatabaseNotification::class)
             ->to(['read', 'delete']);
