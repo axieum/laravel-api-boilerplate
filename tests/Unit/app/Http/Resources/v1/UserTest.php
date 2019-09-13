@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\resources\v1;
+namespace Tests\Unit\app\Http\Resources\v1;
 
 use App\Http\Resources\v1\User as UserResource;
 use App\User;
@@ -14,6 +14,7 @@ class UserTest extends TestCase
     /** @test */
     public function can_see_relevant_fields()
     {
+        /** @var User $user */
         $user = factory('App\User')->create();
 
         /** @noinspection PhpParamsInspection */
