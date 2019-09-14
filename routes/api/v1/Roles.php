@@ -7,7 +7,7 @@
 */
 
 Route::get('/', 'RoleController@index');
-Route::put('/', 'RoleController@store');
+Route::post('/', 'RoleController@store');
 
 Route::prefix('/{role}')->group(function () {
     Route::get('/', 'RoleController@show');

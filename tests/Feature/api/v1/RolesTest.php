@@ -56,7 +56,7 @@ class RolesTest extends TestCase
         $user->allow('create', Role::class);
 
         self::actingAs($user)
-            ->put('/api/v1/roles', $data)
+            ->post('/api/v1/roles', $data)
             ->assertJsonStructure([
                 'message',
                 'role' => [
@@ -82,7 +82,7 @@ class RolesTest extends TestCase
     /** @test */
     public function cannot_create_a_new_role_without_permission()
     {
-        self::put('/api/v1/roles')->assertStatus(403);
+        self::post('/api/v1/roles')->assertStatus(403);
     }
 
     /** @test */
