@@ -1,16 +1,16 @@
 <?php
 
-namespace Tests\Feature\api\v1;
+namespace Tests\Feature\api\v1\Auth;
 
 use App\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\Response;
 use Tests\TestCase;
 
-class UsersTest extends TestCase
+class RegistrationTest extends TestCase
 {
-    use WithFaker, RefreshDatabase;
+    use DatabaseTransactions, WithFaker;
 
     /** @test */
     public function can_register_a_new_user()
@@ -66,7 +66,7 @@ class UsersTest extends TestCase
     /** @test */
     public function cannot_register_with_invalid_email()
     {
-        $emailCsv = fopen(__DIR__ . '/../../../Resources/emails.csv', 'r');
+        $emailCsv = fopen(__DIR__ . '/../../../../Resources/emails.csv', 'r');
 
         while (!feof($emailCsv)) {
             [$email, $valid] = fgetcsv($emailCsv);
