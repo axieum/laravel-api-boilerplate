@@ -29,6 +29,6 @@ class PermissionSeeder extends Seeder
                 'index.role', 'index.ability']);
 
         Bouncer::allowEveryone()->toOwn(DatabaseNotification::class)
-            ->to(['read', 'delete']);
+            ->to(['read', 'mark', 'delete']);
     }
 }

@@ -132,6 +132,9 @@ return [
         'email' => [
             'unique' => 'The :attribute is already in use.',
         ],
+        'bouncer' => [
+            'verify_user' => 'You do not have permission to verify users!',
+        ],
     ],
 
     /*

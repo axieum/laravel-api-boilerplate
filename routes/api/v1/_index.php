@@ -11,5 +11,6 @@
 */
 
 Route::prefix('/auth')->namespace('Auth')->group(__DIR__ . '/Authentication.php');
+Route::prefix('/users')->namespace('Users')->group(__DIR__ . '/Users.php');
 Route::prefix('/roles')->namespace('Roles')->group(__DIR__ . '/Roles.php');
 Route::prefix('/abilities')->namespace('Abilities')->group(__DIR__ . '/Abilities.php');
