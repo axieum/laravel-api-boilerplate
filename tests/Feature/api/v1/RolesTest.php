@@ -5,6 +5,7 @@ namespace Tests\Feature\api\v1;
 use App\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\Response;
 use Silber\Bouncer\Database\Ability;
 use Silber\Bouncer\Database\Role;
 use Tests\TestCase;
@@ -42,7 +43,7 @@ class RolesTest extends TestCase
     /** @test */
     public function cannot_index_roles_without_permission()
     {
-        self::get('/api/v1/roles')->assertStatus(403);
+        self::get('/api/v1/roles')->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     /** @test */
@@ -82,7 +83,7 @@ class RolesTest extends TestCase
     /** @test */
     public function cannot_create_a_new_role_without_permission()
     {
-        self::post('/api/v1/roles')->assertStatus(403);
+        self::post('/api/v1/roles')->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     /** @test */
@@ -167,7 +168,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->delete("/api/v1/roles/{$role->id}")
-            ->assertStatus(204);
+            ->assertStatus(Response::HTTP_NO_CONTENT);
 
         // Ensure the role no longer exists after
         self::assertDatabaseMissing('roles', $role->toArray());
@@ -180,7 +181,7 @@ class RolesTest extends TestCase
         $role = factory(Role::class)->create();
 
         self::delete("/api/v1/roles/{$role->id}")
-            ->assertStatus(403);
+            ->assertStatus(Response::HTTP_FORBIDDEN);
 
         // Ensure the role still exists
         self::assertDatabaseHas('roles', $role->toArray());
@@ -247,7 +248,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->put("/api/v1/roles/{$role->id}/abilities/{$ability->id}")
-            ->assertStatus(200)
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('roles.allowed')]);
 
@@ -277,7 +278,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->delete("/api/v1/roles/{$role->id}/abilities/{$ability->id}")
-            ->assertStatus(200)
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('roles.disallowed')]);
 
@@ -334,7 +335,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->put("/api/v1/roles/{$role->id}/users/{$user->id}")
-            ->assertStatus(200)
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('roles.assigned')]);
 
@@ -360,7 +361,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->delete("/api/v1/roles/{$role->id}/users/{$user->id}")
-            ->assertStatus(200)
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('roles.retracted')]);
 

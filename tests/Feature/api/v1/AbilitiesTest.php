@@ -5,6 +5,7 @@ namespace Tests\Feature\api\v1;
 use App\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\Response;
 use Silber\Bouncer\Database\Ability;
 use Silber\Bouncer\Database\Role;
 use Tests\TestCase;
@@ -43,7 +44,7 @@ class AbilitiesTest extends TestCase
     /** @test */
     public function cannot_index_abilities_without_permission()
     {
-        self::get('/api/v1/abilities')->assertStatus(403);
+        self::get('/api/v1/abilities')->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     /** @test */

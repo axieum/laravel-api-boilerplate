@@ -133,7 +133,10 @@ return [
             'unique' => 'The :attribute is already in use.',
         ],
         'bouncer' => [
-            'verify_user' => 'You do not have permission to verify users!',
+            'user' => [
+                'verify' => 'You do not have permission to verify users!',
+                'email' => 'You do not have permission to update user emails!',
+            ],
         ],
     ],
 

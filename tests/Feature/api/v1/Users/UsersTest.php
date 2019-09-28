@@ -3,10 +3,12 @@
 namespace Tests\Feature\api\v1\Users;
 
 use App\User;
+use Illuminate\Auth\Notifications\VerifyEmail as VerifyEmailNotification;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class UsersTest extends TestCase
@@ -397,7 +399,7 @@ class UsersTest extends TestCase
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonStructure(['message', 'errors' => []])
             ->assertJsonValidationErrors([
-                'verified' => __('validation.custom.bouncer.verify_user', [
+                'verified' => __('validation.custom.bouncer.user.verify', [
                     'attribute' => 'verified'
                 ])
             ]);
@@ -427,7 +429,7 @@ class UsersTest extends TestCase
 
         self::actingAs($active)
             ->patch("/api/v1/users/{$passive->id}", $data)
-            ->assertStatus(200)
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'message',
                 'user' => [
@@ -467,7 +469,7 @@ class UsersTest extends TestCase
 
         self::actingAs($user)
             ->patch("/api/v1/users/{$user->id}", $data)
-            ->assertStatus(200)
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'message',
                 'user' => [
@@ -510,7 +512,7 @@ class UsersTest extends TestCase
 
         self::actingAs($active)
             ->patch("/api/v1/users/{$passive->id}", $data)
-            ->assertStatus(200)
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'message',
                 'user' => [
@@ -541,6 +543,94 @@ class UsersTest extends TestCase
     }
 
     /** @test */
+    public function can_update_user_email()
+    {
+        /** @var User $passive verified user whom is being updated */
+        /** @var User $active user whom can update any user and their emails */
+        [$passive, $active] = factory('App\User', 2)->create();
+
+        $active->allow(['update', 'view.email'], User::class);
+
+        /** @var array $data new passive user details to update to */
+        $data = [
+            'email' => $this->faker->unique()->email
+        ];
+
+        // Begin intercepting notifications for re-verification email sent
+        Notification::fake();
+
+        self::actingAs($active)
+            ->patch("/api/v1/users/{$passive->id}", $data)
+            ->assertStatus(Response::HTTP_OK)
+            ->assertJsonStructure([
+                'message',
+                'user' => [
+                    'id',
+                    'name',
+                    'email',
+                    'email_verified_at',
+                    'updated_at',
+                    'created_at'
+                ]
+            ])
+            ->assertJson([
+                'message' => __('users.updated'),
+                'user' => [
+                    'id' => $passive->id,
+                    'email' => $data['email'], // new email
+                ]
+            ])
+            ->assertJsonMissing([
+                'user' => [
+                    'email_verified_at' => $passive->email_verified_at // is unverified
+                ]
+            ]);
+
+        // Ensure the new details persisted and user is now unverified
+        $passive->refresh();
+        self::assertEquals($data['email'], $passive->email);
+        self::assertFalse($passive->hasVerifiedEmail());
+
+        // Assert new verification email sent
+        Notification::assertSentTo($passive, VerifyEmailNotification::class);
+    }
+
+    /** @test */
+    public function cannot_update_user_email_without_ability()
+    {
+        /** @var User $passive verified user whom is being updated */
+        /** @var User $active user whom can update any user but not their emails */
+        [$passive, $active] = factory('App\User', 2)->create();
+
+        // NB: They require 'view.email' as well to touch emails
+        $active->allow('update', User::class);
+
+        /** @var array $data new passive user details to update to */
+        $data = [
+            'email' => $this->faker->unique()->email
+        ];
+
+        // Begin intercepting notifications for re-verification email sent
+        Notification::fake();
+
+        self::actingAs($active)
+            ->patch("/api/v1/users/{$passive->id}", $data)
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonStructure(['message', 'errors' => []])
+            ->assertJsonValidationErrors([
+                'email' => __('validation.custom.bouncer.user.email', [
+                    'attribute' => 'email'
+                ])
+            ]);
+
+        // Ensure new email did not persist
+        self::assertNotEquals($data['email'], $passive->refresh()->email);
+
+        // Assert new verification email not sent
+        Notification::assertNothingSent();
+    }
+
+    /** @test */
     public function cannot_update_user_without_ability()
     {
         /** @var User $passive user whom is being updated */
@@ -556,7 +646,7 @@ class UsersTest extends TestCase
 
         self::actingAs($active)
             ->patch("/api/v1/users/{$passive->id}", $data)
-            ->assertStatus(403);
+            ->assertStatus(Response::HTTP_FORBIDDEN);
 
         // Ensure the new details did not persist
         $passive->refresh();
@@ -582,10 +672,10 @@ class UsersTest extends TestCase
 
         self::actingAs($active)
             ->patch("/api/v1/users/{$passive->id}", $data)
-            ->assertStatus(422)
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonStructure(['message', 'errors' => []])
             ->assertJsonValidationErrors([
-                'verified' => __('validation.custom.bouncer.verify_user', [
+                'verified' => __('validation.custom.bouncer.user.verify', [
                     'attribute' => 'verified'
                 ])
             ]);

@@ -60,7 +60,7 @@ class UserController extends Controller
             'verified' => ['sometimes', 'boolean', function ($attribute, $value, $fail) {
                 // Setting verified to 'false' is allowed, but 'true' needs authorization
                 if ($value && !Bouncer::can('verify', User::class))
-                    $fail(__('validation.custom.bouncer.verify_user', ['attribute' => $attribute]));
+                    $fail(__('validation.custom.bouncer.user.verify', ['attribute' => $attribute]));
             }],
         ]);
 
@@ -108,11 +108,14 @@ class UserController extends Controller
     {
         $data = request()->validate([
             'name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'email' => ['sometimes', 'string', 'email', 'max:255', function ($attribute, $value, $fail) use ($user) {
+                if (!Bouncer::can('view.email', $user))
+                    $fail(__('validation.custom.bouncer.user.email', ['attribute' => $attribute]));
+            }, 'unique:users,email,' . $user->id],
             'password' => ['sometimes', 'string', 'min:8', 'confirmed'],
             'verified' => ['sometimes', 'boolean', function ($attribute, $value, $fail) use ($user) {
                 if (!Bouncer::can('verify', $user))
-                    $fail(__('validation.custom.bouncer.verify_user', ['attribute' => $attribute]));
+                    $fail(__('validation.custom.bouncer.user.verify', ['attribute' => $attribute]));
             }],
         ]);
 
@@ -120,7 +123,7 @@ class UserController extends Controller
         if (array_key_exists('name', $data))
             $user->name = $data['name'];
 
-        // EMAIL
+        // EMAIL (NB: authorized through validation)
         if (array_key_exists('email', $data)) {
             $user->email = strtolower($data['email']);
             $user->email_verified_at = null; // Require re-verification
