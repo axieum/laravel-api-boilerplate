@@ -3,6 +3,7 @@
 namespace Tests\Feature\api\v1;
 
 use App\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\Response;
@@ -14,12 +15,27 @@ class RolesTest extends TestCase
 {
     use DatabaseTransactions, WithFaker;
 
+    /**
+     * @var int how many roles to pre-generate
+     */
+    private $count = 16;
+
+    /**
+     * @var array|Collection|Role new generated roles
+     */
+    private $roles;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Pre-generate some abilities
+        $this->roles = factory(Role::class, $this->count)->create();
+    }
+
     /** @test */
     public function can_index_roles()
     {
-        // Create new roles to index
-        factory(Role::class, 5)->create();
-
         /** @var User $user new user whom can index all roles */
         $user = factory('App\User')->create();
         $user->allow('index', Role::class);
@@ -38,13 +54,19 @@ class RolesTest extends TestCase
                 ]],
                 'links' => [],
                 'meta' => []
-            ]);
+            ])
+            ->assertJson(['meta' => ['total' => Role::query()->count()]]);
     }
 
     /** @test */
     public function cannot_index_roles_without_permission()
     {
-        self::get('/api/v1/roles')->assertStatus(Response::HTTP_FORBIDDEN);
+        /** @var User $user new user whom cannot index roles */
+        $user = factory('App\User')->create();
+
+        self::actingAs($user)
+            ->get('/api/v1/roles')
+            ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     /** @test */
@@ -85,14 +107,19 @@ class RolesTest extends TestCase
     /** @test */
     public function cannot_create_a_new_role_without_permission()
     {
-        self::post('/api/v1/roles')->assertStatus(Response::HTTP_FORBIDDEN);
+        /** @var User $user new user whom cannot create roles */
+        $user = factory('App\User')->create();
+
+        self::actingAs($user)
+            ->post('/api/v1/roles')
+            ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     /** @test */
-    public function can_retrieve_specific_role()
+    public function can_retrieve_a_specific_role()
     {
         /** @var Role $role */
-        $role = factory(Role::class)->create();
+        $role = $this->roles->random();
 
         /** @var User $user new user whom can view the role */
         $user = factory('App\User')->create();
@@ -128,7 +155,7 @@ class RolesTest extends TestCase
 
         /** @var array $data desired role attribute array for update */
         $data = factory(Role::class)->raw([
-            'level' => $this->faker->numberBetween(0, 10)
+            'level' => $this->faker->numberBetween(0, 10) // update an extra attribute
         ]);
 
         self::actingAs($user)
@@ -153,6 +180,7 @@ class RolesTest extends TestCase
                 ]
             ]);
 
+        // Ensure old role details do not exist, but new ones do
         self::assertDatabaseMissing('roles', $role->only(['name', 'title']));
         self::assertDatabaseHas('roles', $data);
     }
@@ -182,7 +210,7 @@ class RolesTest extends TestCase
     public function cannot_delete_a_role_without_permission()
     {
         /** @var Role $role */
-        $role = factory(Role::class)->create();
+        $role = $this->roles->random();
 
         self::delete("/api/v1/roles/{$role->id}")
             ->assertStatus(Response::HTTP_FORBIDDEN);
@@ -195,7 +223,7 @@ class RolesTest extends TestCase
     public function can_retrieve_a_roles_abilities()
     {
         /** @var Role $role */
-        $role = factory(Role::class)->create();
+        $role = $this->roles->random();
 
         /** @var Ability $ability */
         $ability = factory(Ability::class)->create();
@@ -238,7 +266,7 @@ class RolesTest extends TestCase
     public function can_attach_an_ability_to_a_role()
     {
         /** @var Role $role */
-        $role = factory(Role::class)->create();
+        $role = $this->roles->random();
 
         /** @var Ability $ability */
         $ability = factory(Ability::class)->create();
@@ -265,7 +293,7 @@ class RolesTest extends TestCase
     public function can_detach_an_ability_from_a_role()
     {
         /** @var Role $role */
-        $role = factory(Role::class)->create();
+        $role = $this->roles->random();
 
         /** @var Ability $ability */
         $ability = factory(Ability::class)->create();
@@ -295,7 +323,7 @@ class RolesTest extends TestCase
     public function can_retrieve_a_roles_users()
     {
         /** @var Role $role */
-        $role = factory(Role::class)->create();
+        $role = $this->roles->random();
 
         /** @var User $user new user whom can view and index a roles' users */
         $user = factory('App\User')->create();
@@ -329,7 +357,7 @@ class RolesTest extends TestCase
     public function can_assign_a_role_to_a_user()
     {
         /** @var Role $role */
-        $role = factory(Role::class)->create();
+        $role = $this->roles->random();
 
         /** @var User $user new user whom can assign roles to themselves and the role */
         $user = factory('App\User')->create();
@@ -353,7 +381,7 @@ class RolesTest extends TestCase
     public function can_retract_a_role_from_a_user()
     {
         /** @var Role $role */
-        $role = factory(Role::class)->create();
+        $role = $this->roles->random();
 
         // Create a user and assign them the role
         /** @var User $user new user whom can retract roles from themselves and the role */

@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Silber\Bouncer\BouncerFacade as Bouncer;
 use Silber\Bouncer\Database\Ability;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class UserAbilityController extends Controller
@@ -35,7 +36,10 @@ class UserAbilityController extends Controller
     {
         $abilities = QueryBuilder::for($user->abilities()->getQuery())
             ->allowedSorts(['id', 'name', 'title', 'only_owned', 'scope', 'updated_at', 'created_at'])
-            ->allowedFilters(['only_owned', 'scope', 'updated_at', 'created_at'])
+            ->allowedFilters([
+                'only_owned', 'scope', 'updated_at', 'created_at',
+                AllowedFilter::exact('forbidden')
+            ])
             ->jsonPaginate();
 
         return AbilityResource::collection($abilities)->response();

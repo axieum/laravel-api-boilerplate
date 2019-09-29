@@ -3,6 +3,7 @@
 namespace Tests\Feature\api\v1;
 
 use App\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\Response;
@@ -14,12 +15,27 @@ class AbilitiesTest extends TestCase
 {
     use DatabaseTransactions, WithFaker;
 
+    /**
+     * @var int how many abilities to pre-generate
+     */
+    private $count = 16;
+
+    /**
+     * @var array|Collection|Ability new generated abilities
+     */
+    private $abilities;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Pre-generate some abilities
+        $this->abilities = factory(Ability::class, $this->count)->create();
+    }
+
     /** @test */
     public function can_index_abilities()
     {
-        // Create new roles to index
-        factory(Ability::class, 15)->create();
-
         /** @var User $user new user whom can index all abilities */
         $user = factory('App\User')->create();
         $user->allow('index', Ability::class);
@@ -39,20 +55,26 @@ class AbilitiesTest extends TestCase
                 ]],
                 'links' => [],
                 'meta' => []
-            ]);
+            ])
+            ->assertJson(['meta' => ['total' => Ability::query()->count()]]);
     }
 
     /** @test */
     public function cannot_index_abilities_without_permission()
     {
-        self::get('/api/v1/abilities')->assertStatus(Response::HTTP_FORBIDDEN);
+        /** @var User $user new user whom cannot index abilities */
+        $user = factory('App\User')->create();
+
+        self::actingAs($user)
+            ->get('/api/v1/abilities')
+            ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     /** @test */
     public function can_retrieve_specific_ability()
     {
         /** @var Ability $ability */
-        $ability = factory(Ability::class)->create();
+        $ability = $this->abilities->random();
 
         /** @var User $user new user whom can view the ability */
         $user = factory('App\User')->create();
@@ -86,7 +108,7 @@ class AbilitiesTest extends TestCase
         $role = factory(Role::class)->create();
 
         /** @var Ability $ability */
-        $ability = factory(Ability::class)->create();
+        $ability = $this->abilities->random();
 
         // Give the new role access to the ability
         $role->allow($ability);
@@ -126,7 +148,7 @@ class AbilitiesTest extends TestCase
     public function can_retrieve_an_abilities_users()
     {
         /** @var Ability $ability */
-        $ability = factory(Ability::class)->create();
+        $ability = $this->abilities->random();
 
         /** @var User $user new user whom can view and index an abilities' users */
         $user = factory('App\User')->create();
