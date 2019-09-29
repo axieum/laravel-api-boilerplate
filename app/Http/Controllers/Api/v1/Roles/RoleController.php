@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Role as RoleResource;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Silber\Bouncer\BouncerFacade as Bouncer;
 use Silber\Bouncer\Database\Role;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -65,7 +66,7 @@ class RoleController extends Controller
         return response()->json([
             'message' => __('roles.created'),
             'role' => new RoleResource($role)
-        ]);
+        ], Response::HTTP_CREATED);
     }
 
     /**
@@ -128,6 +129,6 @@ class RoleController extends Controller
 
         Bouncer::refresh();
 
-        return response()->json(null, 204);
+        return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 }

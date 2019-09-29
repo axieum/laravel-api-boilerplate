@@ -26,6 +26,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->get('/api/v1/roles')
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'data' => [[
                     'id',
@@ -58,6 +59,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->post('/api/v1/roles', $data)
+            ->assertStatus(Response::HTTP_CREATED)
             ->assertJsonStructure([
                 'message',
                 'role' => [
@@ -98,6 +100,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->get("/api/v1/roles/{$role->id}")
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'id',
                 'name',
@@ -130,6 +133,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->patch("/api/v1/roles/{$role->id}", $data)
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'message',
                 'role' => [
@@ -206,6 +210,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->get("/api/v1/roles/{$role->id}/abilities")
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'data' => [[
                     'id',
@@ -302,6 +307,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->get("/api/v1/roles/{$role->id}/users")
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'data' => [[
                     'id',

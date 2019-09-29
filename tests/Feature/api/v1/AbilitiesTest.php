@@ -26,6 +26,7 @@ class AbilitiesTest extends TestCase
 
         self::actingAs($user)
             ->get('/api/v1/abilities')
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'data' => [[
                     'id',
@@ -59,6 +60,7 @@ class AbilitiesTest extends TestCase
 
         self::actingAs($user)
             ->get("/api/v1/abilities/{$ability->id}")
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'id',
                 'name',
@@ -96,6 +98,7 @@ class AbilitiesTest extends TestCase
 
         self::actingAs($user)
             ->get("/api/v1/abilities/{$ability->id}/roles")
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'data' => [[
                     'id',
@@ -135,6 +138,7 @@ class AbilitiesTest extends TestCase
 
         self::actingAs($user)
             ->get("/api/v1/abilities/{$ability->id}/users")
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'data' => [[
                     'id',
