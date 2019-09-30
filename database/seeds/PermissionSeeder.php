@@ -23,10 +23,10 @@ class PermissionSeeder extends Seeder
         Bouncer::allow($admin)->everything();
 
         // Everyone
-        Bouncer::allowEveryone()->to(['view'], User::class);
+        Bouncer::allowEveryone()->to(['read'], User::class);
         Bouncer::allowEveryone()->toOwn(User::class)
-            ->to(['update', 'delete', 'view.email', 'index.notification',
-                'index.role', 'index.ability']);
+            ->to(['update', 'delete', 'read-email', 'index-notifications',
+                'index-roles', 'index-abilities']);
 
         Bouncer::allowEveryone()->toOwn(DatabaseNotification::class)
             ->to(['read', 'mark', 'delete']);

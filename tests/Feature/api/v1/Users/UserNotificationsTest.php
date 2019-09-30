@@ -49,7 +49,7 @@ class UserNotificationsTest extends TestCase
     {
         /** @var User $active user whom can index other users notifications */
         $active = factory('App\User')->create();
-        $active->allow('index.notification', User::class);
+        $active->allow('index-notifications', User::class);
 
         /** @var int $perPage how many notifications per page to request */
         $perPage = 10;
@@ -90,7 +90,7 @@ class UserNotificationsTest extends TestCase
     {
         /** @var User $active user whom can index other users notifications */
         $active = factory('App\User')->create();
-        $active->allow('index.notification', User::class);
+        $active->allow('index-notifications', User::class);
 
         $count_read = $this->passive->readNotifications()->count();
         $count_unread = $this->passive->unreadNotifications()->count();

@@ -549,7 +549,7 @@ class UsersTest extends TestCase
         /** @var User $active user whom can update any user and their emails */
         [$passive, $active] = factory('App\User', 2)->create();
 
-        $active->allow(['update', 'view.email'], User::class);
+        $active->allow(['update', 'read-email'], User::class);
 
         /** @var array $data new passive user details to update to */
         $data = [
@@ -602,7 +602,7 @@ class UsersTest extends TestCase
         /** @var User $active user whom can update any user but not their emails */
         [$passive, $active] = factory('App\User', 2)->create();
 
-        // NB: They require 'view.email' as well to touch emails
+        // NB: They require 'read-email' as well to touch emails
         $active->allow('update', User::class);
 
         /** @var array $data new passive user details to update to */

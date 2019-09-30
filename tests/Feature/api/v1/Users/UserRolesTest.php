@@ -39,7 +39,7 @@ class UserRolesTest extends TestCase
         /** @var User $active user whom can index any users' roles */
         [$passive, $active] = factory('App\User', 2)->create();
 
-        $active->allow('index.role', User::class);
+        $active->allow('index-roles', User::class);
         $passive->assign($this->roles);
 
         // Request passive user's roles

@@ -21,7 +21,7 @@ class UserAbilityController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('can:index.ability,user')->only('index');
+        $this->middleware('can:index-abilities,user')->only('index');
         $this->middleware(['can:allow,user', 'can:allow,ability'])->only('attach');
         $this->middleware(['can:disallow,user', 'can:disallow,ability'])->only('detach');
     }

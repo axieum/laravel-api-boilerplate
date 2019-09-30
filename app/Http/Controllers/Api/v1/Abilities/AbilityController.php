@@ -18,7 +18,7 @@ class AbilityController extends Controller
     public function __construct()
     {
         $this->middleware('can:index,\Silber\Bouncer\Database\Ability')->only('index');
-        $this->middleware('can:view,ability')->only('show');
+        $this->middleware('can:read,ability')->only('show');
     }
 
     /**

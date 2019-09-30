@@ -20,7 +20,7 @@ class RoleAbilityController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('can:index.ability,role')->only('index');
+        $this->middleware('can:index-abilities,role')->only('index');
         $this->middleware(['can:allow,role', 'can:allow,ability'])->only('attach');
         $this->middleware(['can:disallow,role', 'can:disallow,ability'])->only('detach');
     }

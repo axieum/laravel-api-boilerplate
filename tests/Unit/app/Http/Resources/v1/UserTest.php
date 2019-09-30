@@ -96,7 +96,7 @@ class UserTest extends TestCase
 
         /** @var User $active user whom is viewing passive user */
         $active = factory('App\User')->create();
-        $active->allow('view.email', $passive);
+        $active->allow('read-email', $passive);
 
         self::actingAs($active);
         /** @noinspection PhpParamsInspection */

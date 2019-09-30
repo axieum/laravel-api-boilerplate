@@ -121,9 +121,9 @@ class RolesTest extends TestCase
         /** @var Role $role */
         $role = $this->roles->random();
 
-        /** @var User $user new user whom can view the role */
+        /** @var User $user new user whom can read the role */
         $user = factory('App\User')->create();
-        $user->allow('view', $role);
+        $user->allow('read', $role);
 
         self::actingAs($user)
             ->get("/api/v1/roles/{$role->id}")
@@ -234,7 +234,7 @@ class RolesTest extends TestCase
         /** @var User $user new user whom can view and index a roles' abilities */
         $user = factory('App\User')->create();
         $user->allow('view', $role);
-        $user->allow('index.ability', $role);
+        $user->allow('index-abilities', $role);
 
         self::actingAs($user)
             ->get("/api/v1/roles/{$role->id}/abilities")
@@ -328,7 +328,7 @@ class RolesTest extends TestCase
         /** @var User $user new user whom can view and index a roles' users */
         $user = factory('App\User')->create();
         $user->allow('view', $role);
-        $user->allow('index.user', $role);
+        $user->allow('index-users', $role);
 
         // Assign the role to the new user
         $user->assign($role);

@@ -22,7 +22,7 @@ class RoleController extends Controller
     {
         $this->middleware('can:index,\Silber\Bouncer\Database\Role')->only('index');
         $this->middleware('can:create,\Silber\Bouncer\Database\Role')->only('store');
-        $this->middleware('can:view,role')->only('show');
+        $this->middleware('can:read,role')->only('show');
         $this->middleware('can:update,role')->only('update');
         $this->middleware('can:delete,role')->only('destroy');
     }

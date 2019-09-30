@@ -18,7 +18,7 @@ class AbilityUserController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('can:index.user,ability')->only('index');
+        $this->middleware('can:index-users,ability')->only('index');
     }
 
     /**

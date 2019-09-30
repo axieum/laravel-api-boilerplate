@@ -26,7 +26,7 @@ class UserController extends Controller
         $this->middleware('auth')->only('current');
         $this->middleware('can:index,App\User')->only('index');
         $this->middleware('can:create,App\User')->only('store');
-        $this->middleware('can:view,user')->only('show');
+        $this->middleware('can:read,user')->only('show');
         $this->middleware('can:update,user')->only('update');
         $this->middleware('can:delete,user')->only('destroy');
     }
@@ -109,7 +109,7 @@ class UserController extends Controller
         $data = request()->validate([
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'string', 'email', 'max:255', function ($attribute, $value, $fail) use ($user) {
-                if (!Bouncer::can('view.email', $user))
+                if (!Bouncer::can('read-email', $user))
                     $fail(__('validation.custom.bouncer.user.email', ['attribute' => $attribute]));
             }, 'unique:users,email,' . $user->id],
             'password' => ['sometimes', 'string', 'min:8', 'confirmed'],

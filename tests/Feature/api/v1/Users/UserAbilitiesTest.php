@@ -40,7 +40,7 @@ class UserAbilitiesTest extends TestCase
         /** @var User $active user whom can index any users' abilities */
         [$passive, $active] = factory('App\User', 2)->create();
 
-        $active->allow('index.ability', User::class);
+        $active->allow('index-abilities', User::class);
         $passive->allow($this->abilities);
 
         // Request passive user's abilities
@@ -69,7 +69,7 @@ class UserAbilitiesTest extends TestCase
         /** @var User $passive user whom has abilities */
         /** @var User $active user whom can index any users' abilities */
         [$passive, $active] = factory('App\User', 2)->create();
-        $active->allow('index.ability', User::class);
+        $active->allow('index-abilities', User::class);
 
         /** @var Collection|Ability $forbid random abilities to be forbid */
         /** @var Collection|Ability $allow random abilities to be allowed */

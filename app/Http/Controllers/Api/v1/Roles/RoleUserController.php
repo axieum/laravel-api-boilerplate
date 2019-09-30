@@ -20,7 +20,7 @@ class RoleUserController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('can:index.user,role')->only('index');
+        $this->middleware('can:index-users,role')->only('index');
         $this->middleware(['can:assign,role', 'can:assign,user'])->only('assign');
         $this->middleware(['can:retract,role', 'can:retract,user'])->only('retract');
     }

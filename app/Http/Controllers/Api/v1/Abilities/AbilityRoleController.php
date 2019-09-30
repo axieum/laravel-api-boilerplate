@@ -17,7 +17,7 @@ class AbilityRoleController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('can:index.role,ability')->only('index');
+        $this->middleware('can:index-roles,ability')->only('index');
     }
 
     /**

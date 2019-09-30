@@ -23,7 +23,7 @@ class UserNotificationController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('can:index.notification,user')->only('index');
+        $this->middleware('can:index-notifications,user')->only('index');
         $this->middleware('can:read,notification')->only('show');
         $this->middleware('can:mark,notification')->only('mark');
         $this->middleware('can:delete,notification')->only('destroy');

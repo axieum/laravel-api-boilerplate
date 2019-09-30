@@ -29,7 +29,7 @@ class User extends JsonResource
     public function toArray($request)
     {
         $canSeeEmail = $this->resource->wasRecentlyCreated ||
-            Bouncer::can('view.email', $this->resource);
+            Bouncer::can('read-email', $this->resource);
 
         return [
             'id' => $this->id,

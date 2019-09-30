@@ -76,9 +76,9 @@ class AbilitiesTest extends TestCase
         /** @var Ability $ability */
         $ability = $this->abilities->random();
 
-        /** @var User $user new user whom can view the ability */
+        /** @var User $user new user whom can read the ability */
         $user = factory('App\User')->create();
-        $user->allow('view', $ability);
+        $user->allow('read', $ability);
 
         self::actingAs($user)
             ->get("/api/v1/abilities/{$ability->id}")
@@ -116,7 +116,7 @@ class AbilitiesTest extends TestCase
         /** @var User $user new user whom can view and index abilities' roles */
         $user = factory('App\User')->create();
         $user->allow('view', $ability);
-        $user->allow('index.role', $ability);
+        $user->allow('index-roles', $ability);
 
         self::actingAs($user)
             ->get("/api/v1/abilities/{$ability->id}/roles")
@@ -153,7 +153,7 @@ class AbilitiesTest extends TestCase
         /** @var User $user new user whom can view and index an abilities' users */
         $user = factory('App\User')->create();
         $user->allow('view', $ability);
-        $user->allow('index.user', $ability);
+        $user->allow('index-users', $ability);
 
         // Give the new user access to the ability
         $user->allow($ability);
