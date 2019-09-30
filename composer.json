@@ -12,6 +12,7 @@
         "ext-pdo": "*",
         "fideloper/proxy": "^4.0",
         "laravel/framework": "^6.0",
+        "laravel/passport": "^7.5",
         "laravel/tinker": "^1.0",
         "silber/bouncer": "v1.0.0-rc.6",
         "spatie/laravel-json-api-paginate": "^1.6",

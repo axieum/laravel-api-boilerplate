@@ -28,6 +28,7 @@ class Bootstrap implements BeforeFirstTestHook, AfterLastTestHook
         $commands = [
             'config:cache',
             'event:cache',
+            'passport:install', // initialise Passport (OAuth)
             'db:seed --class=PermissionSeeder', // seed Bouncer permissions
         ];
 

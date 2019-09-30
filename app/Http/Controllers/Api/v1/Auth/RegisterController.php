@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\User as UserResource;
 use App\User;
 use Illuminate\Auth\Events\Registered as RegisteredEvent;
-use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
@@ -20,12 +20,9 @@ class RegisterController extends Controller
     |--------------------------------------------------------------------------
     |
     | This controller handles the registration of new users as well as their
-    | validation and creation. By default this controller uses a trait to
-    | provide this functionality without requiring any additional code.
+    | validation and creation.
     |
     */
-
-    use RegistersUsers;
 
     /**
      * Create a new controller instance.
@@ -35,6 +32,19 @@ class RegisterController extends Controller
     public function __construct()
     {
         $this->middleware('guest');
+    }
+
+    /**
+     * Handle a registration request for the application.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function register(Request $request)
+    {
+        $this->validator($request->all())->validate();
+
+        return $this->registered($request, $this->create($request->all()));
     }
 
     /**
@@ -73,7 +83,7 @@ class RegisterController extends Controller
      *
      * @param Request $request
      * @param mixed   $user
-     * @return mixed
+     * @return JsonResponse
      */
     protected function registered(Request $request, $user)
     {
