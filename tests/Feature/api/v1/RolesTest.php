@@ -16,20 +16,20 @@ class RolesTest extends TestCase
     use DatabaseTransactions, WithFaker;
 
     /**
-     * @var int how many roles to pre-generate
-     */
-    private $count = 16;
-
-    /**
      * @var array|Collection|Role new generated roles
      */
     private $roles;
+
+    /**
+     * @var int how many roles to pre-generate
+     */
+    private $count = 16;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        // Pre-generate some abilities
+        // Pre-generate some roles
         $this->roles = factory(Role::class, $this->count)->create();
     }
 
@@ -225,13 +225,11 @@ class RolesTest extends TestCase
         /** @var Role $role */
         $role = $this->roles->random();
 
-        /** @var Ability $ability */
+        /** @var Ability $ability ability that belongs to the role */
         $ability = factory(Ability::class)->create();
-
-        // Give the new role access to the ability
         $role->allow($ability);
 
-        /** @var User $user new user whom can view and index a roles' abilities */
+        /** @var User $user user whom can view and index the role's abilities */
         $user = factory('App\User')->create();
         $user->allow('view', $role);
         $user->allow('index-abilities', $role);
@@ -253,12 +251,10 @@ class RolesTest extends TestCase
                 'meta' => []
             ])
             ->assertJson([
-                'data' => [
-                    [
-                        'name' => $ability->name,
-                        'title' => $ability->title
-                    ]
-                ]
+                'data' => [[
+                    'name' => $ability->name,
+                    'title' => $ability->title
+                ]]
             ]);
     }
 
@@ -295,13 +291,11 @@ class RolesTest extends TestCase
         /** @var Role $role */
         $role = $this->roles->random();
 
-        /** @var Ability $ability */
+        /** @var Ability $ability ability that belongs to the role */
         $ability = factory(Ability::class)->create();
-
-        // Allow the role access to the ability
         $role->allow($ability);
 
-        /** @var User $user new user whom can disallow both the role and ability */
+        /** @var User $user user whom can disallow both the role and ability */
         $user = factory('App\User')->create();
         $user->allow('disallow', $role);
         $user->allow('disallow', $ability);
@@ -325,15 +319,17 @@ class RolesTest extends TestCase
         /** @var Role $role */
         $role = $this->roles->random();
 
-        /** @var User $user new user whom can view and index a roles' users */
-        $user = factory('App\User')->create();
-        $user->allow('view', $role);
-        $user->allow('index-users', $role);
+        /** @var User $active user whom can view and index the role's users */
+        $active = factory('App\User')->create();
+        $active->allow('view', $role);
+        $active->allow('index-users', $role);
 
-        // Assign the role to the new user
-        $user->assign($role);
+        /** @var Collection|User $users users whom inherit the role */
+        $users = factory('App\User', 10)->create();
+        foreach ($users as $user)
+            $user->assign($role);
 
-        self::actingAs($user)
+        self::actingAs($active)
             ->get("/api/v1/roles/{$role->id}/users")
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
@@ -344,13 +340,7 @@ class RolesTest extends TestCase
                 'links' => [],
                 'meta' => []
             ])
-            ->assertJson([
-                'data' => [
-                    [
-                        'name' => $user->name
-                    ]
-                ]
-            ]);
+            ->assertJsonCount($users->count(), 'data');
     }
 
     /** @test */
@@ -359,22 +349,24 @@ class RolesTest extends TestCase
         /** @var Role $role */
         $role = $this->roles->random();
 
-        /** @var User $user new user whom can assign roles to themselves and the role */
-        $user = factory('App\User')->create();
-        $user->allow('assign', $role);
-        $user->allow('assign', $user);
+        /** @var User $passive user whom is being assigned the role */
+        /** @var User $active user whom can assign a specific role to others */
+        [$passive, $active] = factory('App\User', 2)->create();
+
+        $active->allow('assign', $role); // can assign the specific role
+        $active->allow('assign', User::class); // can assign to any user
 
         // Ensure the user does not inherit the role before test
-        self::assertTrue($user->isNotA($role));
+        self::assertTrue($passive->isNotA($role));
 
-        self::actingAs($user)
-            ->put("/api/v1/roles/{$role->id}/users/{$user->id}")
+        self::actingAs($active)
+            ->put("/api/v1/roles/{$role->id}/users/{$passive->id}")
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('roles.assigned')]);
 
         // Ensure the user inherits the role post test
-        self::assertTrue($user->isA($role));
+        self::assertTrue($passive->isA($role));
     }
 
     /** @test */
@@ -383,23 +375,24 @@ class RolesTest extends TestCase
         /** @var Role $role */
         $role = $this->roles->random();
 
-        // Create a user and assign them the role
-        /** @var User $user new user whom can retract roles from themselves and the role */
-        $user = factory('App\User')->create();
-        $user->allow('retract', $role);
-        $user->allow('retract', $user);
-        $user->assign($role);
+        /** @var User $passive user whom is having the role retracted */
+        /** @var User $active user whom can retract a specific role from others */
+        [$passive, $active] = factory('App\User', 2)->create();
+
+        $active->allow('retract', $role); // can retract the specific role
+        $active->allow('retract', User::class); // can retract from any user
+        $passive->assign($role);
 
         // Ensure the user inherits the role before test
-        self::assertTrue($user->isA($role));
+        self::assertTrue($passive->isA($role));
 
-        self::actingAs($user)
-            ->delete("/api/v1/roles/{$role->id}/users/{$user->id}")
+        self::actingAs($active)
+            ->delete("/api/v1/roles/{$role->id}/users/{$passive->id}")
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('roles.retracted')]);
 
         // Ensure the user does not inherit the role post test
-        self::assertTrue($user->isNotA($role));
+        self::assertTrue($passive->isNotA($role));
     }
 }

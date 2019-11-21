@@ -16,14 +16,14 @@ class UserAbilitiesTest extends TestCase
     use DatabaseTransactions, WithFaker;
 
     /**
-     * @var int how many abilities to pre-generate
-     */
-    private $count = 5;
-
-    /**
      * @var array|Collection|Ability new generated abilities
      */
     private $abilities;
+
+    /**
+     * @var int how many abilities to pre-generate
+     */
+    private $count = 5;
 
     protected function setUp(): void
     {
@@ -143,22 +143,24 @@ class UserAbilitiesTest extends TestCase
         /** @var Ability $ability ability to be allowed */
         $ability = $this->abilities->random();
 
-        /** @var User $user user whom can allow a specific ability for themselves */
-        $user = factory('App\User')->create();
-        $user->allow('allow', $ability); // can allow the specific ability
-        $user->allow('allow', $user); // can allow for them
+        /** @var User $passive user whom is being allowed the ability */
+        /** @var User $active user whom can allow a specific ability for others */
+        [$passive, $active] = factory('App\User', 2)->create();
+
+        $active->allow('allow', $ability); // can allow the specific ability
+        $active->allow('allow', User::class); // can allow for any user
 
         // Ensure the user does not inherit the ability before test
-        self::assertTrue($user->cannot($ability->name));
+        self::assertTrue($passive->cannot($ability->name));
 
-        self::actingAs($user)
-            ->put("/api/v1/users/{$user->id}/abilities/{$ability->id}")
+        self::actingAs($active)
+            ->put("/api/v1/users/{$passive->id}/abilities/{$ability->id}")
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('users.allowed')]);
 
         // Ensure the user inherits the ability post test
-        self::assertTrue($user->can($ability->name));
+        self::assertTrue($passive->can($ability->name));
     }
 
     /** @test */
@@ -167,8 +169,8 @@ class UserAbilitiesTest extends TestCase
         /** @var Ability $ability ability to be forbid */
         $ability = $this->abilities->random();
 
-        /** @var User $passive user whom is being forbid common ability */
-        /** @var User $active user whom can forbid a specific ability from any user */
+        /** @var User $passive user whom is being forbid "common" ability */
+        /** @var User $active user whom can forbid a specific ability from others */
         [$passive, $active] = factory('App\User', 2)->create();
 
         Bouncer::allowEveryone()->to($ability); // allow everyone this ability
@@ -194,7 +196,7 @@ class UserAbilitiesTest extends TestCase
         /** @var Ability $ability ability to be allowed */
         $ability = $this->abilities->random();
 
-        /** @var User $user user whom cannot allow a specific ability for themselves */
+        /** @var User $user user whom cannot allow a specific ability */
         $user = factory('App\User')->create();
 
         // Ensure the user does not inherit the ability before test
@@ -214,23 +216,25 @@ class UserAbilitiesTest extends TestCase
         /** @var Ability $ability ability to be disallowed */
         $ability = $this->abilities->random();
 
-        /** @var User $user user whom can disallow a specific ability from themselves */
-        $user = factory('App\User')->create();
-        $user->allow('disallow', $ability); // can disallow the specific ability
-        $user->allow('disallow', $user); // can disallow from them
-        $user->allow($ability);
+        /** @var User $passive user whom is being disallowed the ability */
+        /** @var User $active user whom can disallow a specific ability from others */
+        [$passive, $active] = factory('App\User', 2)->create();
+
+        $active->allow('disallow', $ability); // can disallow the specific ability
+        $active->allow('disallow', User::class); // can disallow from any user
+        $passive->allow($ability);
 
         // Ensure the user inherits the ability beforehand
-        self::assertTrue($user->can($ability->name));
+        self::assertTrue($passive->can($ability->name));
 
-        self::actingAs($user)
-            ->delete("/api/v1/users/{$user->id}/abilities/{$ability->id}")
+        self::actingAs($active)
+            ->delete("/api/v1/users/{$passive->id}/abilities/{$ability->id}")
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('users.disallowed')]);
 
         // Ensure the user does not inherit the ability
-        self::assertTrue($user->cannot($ability->name));
+        self::assertTrue($passive->cannot($ability->name));
     }
 
     /** @test */
@@ -239,7 +243,7 @@ class UserAbilitiesTest extends TestCase
         /** @var Ability $ability ability to be allowed */
         $ability = $this->abilities->random();
 
-        /** @var User $user user whom cannot allow a specific ability for themselves */
+        /** @var User $user user whom cannot disallow a specific ability */
         $user = factory('App\User')->create();
         $user->allow($ability);
 

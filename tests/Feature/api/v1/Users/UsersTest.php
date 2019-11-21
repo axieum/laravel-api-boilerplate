@@ -165,6 +165,33 @@ class UsersTest extends TestCase
             ->assertJson([
                 'id' => $passive->id,
                 'name' => $passive->name
+            ])
+            ->assertJsonMissing(['email' => $passive->email]);
+    }
+
+    /** @test */
+    public function can_see_users_email_with_ability()
+    {
+        /** @var User $passive user to be retrieved */
+        /** @var User $active user whom can retrieve passive users and see all emails */
+        [$passive, $active] = factory('App\User', 2)->create();
+
+        $active->allow('read-email', User::class);
+
+        self::actingAs($active)
+            ->get("/api/v1/users/{$passive->id}")
+            ->assertStatus(Response::HTTP_OK)
+            ->assertJsonStructure([
+                'id',
+                'name',
+                'email_verified_at',
+                'updated_at',
+                'created_at'
+            ])
+            ->assertJson([
+                'id' => $passive->id,
+                'name' => $passive->name,
+                'email' => $passive->email
             ]);
     }
 
@@ -578,11 +605,7 @@ class UsersTest extends TestCase
                 'user' => [
                     'id' => $passive->id,
                     'email' => $data['email'], // new email
-                ]
-            ])
-            ->assertJsonMissing([
-                'user' => [
-                    'email_verified_at' => $passive->email_verified_at // is unverified
+                    'email_verified_at' => null // is unverified
                 ]
             ]);
 

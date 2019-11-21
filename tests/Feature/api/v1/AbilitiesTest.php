@@ -16,14 +16,14 @@ class AbilitiesTest extends TestCase
     use DatabaseTransactions, WithFaker;
 
     /**
-     * @var int how many abilities to pre-generate
-     */
-    private $count = 16;
-
-    /**
      * @var array|Collection|Ability new generated abilities
      */
     private $abilities;
+
+    /**
+     * @var int how many abilities to pre-generate
+     */
+    private $count = 16;
 
     protected function setUp(): void
     {
@@ -104,16 +104,14 @@ class AbilitiesTest extends TestCase
     /** @test */
     public function can_retrieve_an_abilities_roles()
     {
-        /** @var Role $role */
-        $role = factory(Role::class)->create();
-
         /** @var Ability $ability */
         $ability = $this->abilities->random();
 
-        // Give the new role access to the ability
+        /** @var Role $role role that inherits the ability */
+        $role = factory(Role::class)->create();
         $role->allow($ability);
 
-        /** @var User $user new user whom can view and index abilities' roles */
+        /** @var User $user user whom can view and index the abilities' roles */
         $user = factory('App\User')->create();
         $user->allow('view', $ability);
         $user->allow('index-roles', $ability);
@@ -135,12 +133,10 @@ class AbilitiesTest extends TestCase
                 'meta' => []
             ])
             ->assertJson([
-                'data' => [
-                    [
-                        'name' => $role->name,
-                        'title' => $role->title
-                    ]
-                ]
+                'data' => [[
+                    'name' => $role->name,
+                    'title' => $role->title
+                ]]
             ]);
     }
 
@@ -150,15 +146,17 @@ class AbilitiesTest extends TestCase
         /** @var Ability $ability */
         $ability = $this->abilities->random();
 
-        /** @var User $user new user whom can view and index an abilities' users */
-        $user = factory('App\User')->create();
-        $user->allow('view', $ability);
-        $user->allow('index-users', $ability);
+        /** @var User $active user whom can view and index the abilities' users */
+        $active = factory('App\User')->create();
+        $active->allow('view', $ability);
+        $active->allow('index-users', $ability);
 
-        // Give the new user access to the ability
-        $user->allow($ability);
+        /** @var Collection|User $users users whom inherit the ability */
+        $users = factory('App\User', 10)->create();
+        foreach ($users as $user)
+            $user->allow($ability);
 
-        self::actingAs($user)
+        self::actingAs($active)
             ->get("/api/v1/abilities/{$ability->id}/users")
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
@@ -169,12 +167,6 @@ class AbilitiesTest extends TestCase
                 'links' => [],
                 'meta' => []
             ])
-            ->assertJson([
-                'data' => [
-                    [
-                        'name' => $user->name
-                    ]
-                ]
-            ]);
+            ->assertJsonCount($users->count(), 'data');
     }
 }

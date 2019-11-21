@@ -135,7 +135,7 @@ class UserNotificationsTest extends TestCase
     /** @test */
     public function cannot_index_notifications_without_ability()
     {
-        /** @var User $active user whom can index other users notifications */
+        /** @var User $active user whom cannot index other users notifications */
         $active = factory('App\User')->create();
 
         self::actingAs($active)
