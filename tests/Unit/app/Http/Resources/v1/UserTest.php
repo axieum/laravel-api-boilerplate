@@ -11,19 +11,31 @@ class UserTest extends TestCase
 {
     use DatabaseTransactions;
 
+    /**
+     * @var User user to be queried
+     */
+    private $user;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->user = factory('App\User')->create();
+    }
+
     /** @test */
     public function can_see_relevant_fields()
     {
-        /** @var User $user */
-        $user = factory('App\User')->create();
+        /** @var User $active user whom is viewing passive user */
+        $active = factory('App\User')->create();
 
         /** @noinspection PhpParamsInspection */
-        self::createTestResponse((new UserResource($user))->response())
+        self::actingAs($active)
+            ->createTestResponse((new UserResource($this->user))->response())
             ->assertJsonStructure([
                 'data' => [
                     'id',
                     'name',
-                    'email',
                     'email_verified_at',
                     'updated_at',
                     'created_at'
@@ -31,9 +43,8 @@ class UserTest extends TestCase
             ])
             ->assertJson([
                 'data' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email
+                    'id' => $this->user->id,
+                    'name' => $this->user->name
                 ]
             ]);
     }
@@ -41,37 +52,38 @@ class UserTest extends TestCase
     /** @test */
     public function cannot_see_sensitive_fields()
     {
-        /** @var User $user */
-        $user = factory('App\User')->create();
+        /** @var User $active user whom is viewing passive user */
+        $active = factory('App\User')->create();
 
         /** @noinspection PhpParamsInspection */
-        self::createTestResponse((new UserResource($user))->response())
-            ->assertDontSee(json_encode($user->password))
-            ->assertDontSee(json_encode($user->remember_token));
+        self::actingAs($active)
+            ->createTestResponse((new UserResource($this->user))->response())
+            ->assertDontSee(json_encode($this->user->password))
+            ->assertDontSee(json_encode($this->user->remember_token));
     }
 
     /** @test */
     public function can_see_email_on_new_user()
     {
-        /** @var User $user */
-        $user = factory('App\User')->create();
-//        $user->wasRecentlyCreated = true;
+        $this->user->wasRecentlyCreated = true;
 
         /** @noinspection PhpParamsInspection */
-        self::createTestResponse((new UserResource($user))->response())
-            ->assertJson(['data' => ['email' => $user->email]]);
+        self::createTestResponse((new UserResource($this->user))->response())
+            ->assertJson(['data' => ['email' => $this->user->email]]);
     }
 
     /** @test */
     public function cannot_see_email_on_non_new_user()
     {
-        /** @var User $user */
-        $user = factory('App\User')->create();
-        $user->wasRecentlyCreated = false;
+        /** @var User $active user whom is viewing passive user */
+        $active = factory('App\User')->create();
+
+        $this->user->wasRecentlyCreated = false;
 
         /** @noinspection PhpParamsInspection */
-        self::createTestResponse((new UserResource($user))->response())
-            ->assertJsonMissing(['email' => $user->email]);
+        self::actingAs($active)
+            ->createTestResponse((new UserResource($this->user))->response())
+            ->assertJsonMissing(['email' => $this->user->email]);
     }
 
     /** @test */
@@ -79,28 +91,26 @@ class UserTest extends TestCase
     {
         /** @var User $user */
         $user = factory('App\User')->create();
-        $user->wasRecentlyCreated = false;
+        $user->wasRecentlyCreated = false; // do not conflict with new user case
 
-        self::actingAs($user);
         /** @noinspection PhpParamsInspection */
-        self::createTestResponse((new UserResource($user))->response())
+        self::actingAs($user)
+            ->createTestResponse((new UserResource($user))->response())
             ->assertJson(['data' => ['email' => $user->email]]);
     }
 
     /** @test */
     public function can_see_email_with_ability()
     {
-        /** @var User $passive user whom is being viewed */
-        $passive = factory('App\User')->create();
-        $passive->wasRecentlyCreated = false;
-
-        /** @var User $active user whom is viewing passive user */
+        /** @var User $active user whom can read passive user's email */
         $active = factory('App\User')->create();
-        $active->allow('read-email', $passive);
 
-        self::actingAs($active);
+        $this->user->wasRecentlyCreated = false;
+        $active->allow('read-email', $this->user);
+
         /** @noinspection PhpParamsInspection */
-        self::createTestResponse((new UserResource($passive))->response())
-            ->assertJson(['data' => ['email' => $passive->email]]);
+        self::actingAs($active)
+            ->createTestResponse((new UserResource($this->user))->response())
+            ->assertJson(['data' => ['email' => $this->user->email]]);
     }
 }

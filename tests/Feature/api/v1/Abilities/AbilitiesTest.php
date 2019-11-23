@@ -1,19 +1,17 @@
 <?php
 
-namespace Tests\Feature\api\v1;
+namespace Tests\Feature\api\v1\Abilities;
 
 use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\Response;
 use Silber\Bouncer\Database\Ability;
-use Silber\Bouncer\Database\Role;
 use Tests\TestCase;
 
 class AbilitiesTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use DatabaseTransactions;
 
     /**
      * @var array|Collection|Ability new generated abilities
@@ -102,71 +100,13 @@ class AbilitiesTest extends TestCase
     }
 
     /** @test */
-    public function can_retrieve_an_abilities_roles()
+    public function cannot_retrieve_ability_without_permission()
     {
-        /** @var Ability $ability */
-        $ability = $this->abilities->random();
-
-        /** @var Role $role role that inherits the ability */
-        $role = factory(Role::class)->create();
-        $role->allow($ability);
-
-        /** @var User $user user whom can view and index the abilities' roles */
+        /** @var User $user new user whom cannot read abilities */
         $user = factory('App\User')->create();
-        $user->allow('view', $ability);
-        $user->allow('index-roles', $ability);
 
         self::actingAs($user)
-            ->get("/api/v1/abilities/{$ability->id}/roles")
-            ->assertStatus(Response::HTTP_OK)
-            ->assertJsonStructure([
-                'data' => [[
-                    'id',
-                    'name',
-                    'title',
-                    'level',
-                    'scope',
-                    'updated_at',
-                    'created_at'
-                ]],
-                'links' => [],
-                'meta' => []
-            ])
-            ->assertJson([
-                'data' => [[
-                    'name' => $role->name,
-                    'title' => $role->title
-                ]]
-            ]);
-    }
-
-    /** @test */
-    public function can_retrieve_an_abilities_users()
-    {
-        /** @var Ability $ability */
-        $ability = $this->abilities->random();
-
-        /** @var User $active user whom can view and index the abilities' users */
-        $active = factory('App\User')->create();
-        $active->allow('view', $ability);
-        $active->allow('index-users', $ability);
-
-        /** @var Collection|User $users users whom inherit the ability */
-        $users = factory('App\User', 10)->create();
-        foreach ($users as $user)
-            $user->allow($ability);
-
-        self::actingAs($active)
-            ->get("/api/v1/abilities/{$ability->id}/users")
-            ->assertStatus(Response::HTTP_OK)
-            ->assertJsonStructure([
-                'data' => [[
-                    'id',
-                    'name'
-                ]],
-                'links' => [],
-                'meta' => []
-            ])
-            ->assertJsonCount($users->count(), 'data');
+            ->get("/api/v1/abilities/{$this->abilities->random()->id}")
+            ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 }

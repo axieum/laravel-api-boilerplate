@@ -30,7 +30,7 @@ class RegistrationTest extends TestCase
                 'user' => [
                     'name' => $data['name'],
                     'email' => $data['email'],
-                    'email_verified_at' => null // Not verified
+                    'email_verified_at' => null // not verified
                 ]
             ]);
 
@@ -61,26 +61,6 @@ class RegistrationTest extends TestCase
             ->assertJsonValidationErrors([
                 'email' => __('validation.custom.email.unique', ['attribute' => 'email'])
             ]);
-    }
-
-    /** @test */
-    public function cannot_register_with_invalid_email()
-    {
-        $emailCsv = fopen(__DIR__ . '/../../../../Resources/emails.csv', 'r');
-
-        while (!feof($emailCsv)) {
-            [$email, $valid] = fgetcsv($emailCsv);
-            if (is_null($valid) || (bool)$valid) continue; // Only want to check invalid emails
-
-            self::post('/api/v1/auth/register', ['email' => trim($email)])
-                ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-                ->assertJsonStructure(['message', 'errors' => ['email']])
-                ->assertJsonValidationErrors([
-                    'email' => __('validation.email', ['attribute' => 'email'])
-                ]);
-        }
-
-        fclose($emailCsv);
     }
 
     /** @test */

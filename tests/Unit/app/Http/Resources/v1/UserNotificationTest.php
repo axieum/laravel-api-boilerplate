@@ -6,12 +6,11 @@ use App\Http\Resources\v1\UserNotification as UserNotificationResource;
 use App\Notifications\v1\SimpleNotification;
 use App\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class UserNotificationTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use DatabaseTransactions;
 
     /**
      * @var User user receiving notification
