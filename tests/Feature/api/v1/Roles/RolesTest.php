@@ -6,7 +6,6 @@ use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Http\Response;
 use Silber\Bouncer\Database\Role;
 use Tests\TestCase;
 
@@ -41,7 +40,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->get('/api/v1/roles')
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [[
                     'id',
@@ -65,7 +64,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->get('/api/v1/roles')
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
     }
 
     /** @test */
@@ -80,7 +79,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->post('/api/v1/roles', $data)
-            ->assertStatus(Response::HTTP_CREATED)
+            ->assertCreated()
             ->assertJsonStructure([
                 'message',
                 'role' => [
@@ -111,7 +110,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->post('/api/v1/roles')
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
     }
 
     /** @test */
@@ -126,7 +125,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->get("/api/v1/roles/{$role->id}")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'id',
                 'name',
@@ -153,7 +152,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->get("/api/v1/roles/{$role->id}")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
     }
 
     /** @test */
@@ -173,7 +172,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->patch("/api/v1/roles/{$role->id}", $data)
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'message',
                 'role' => [
@@ -214,7 +213,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->patch("/api/v1/roles/{$role->id}", $data)
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
 
         // Ensure old role details still exist, and new ones do not
         self::assertDatabaseHas('roles', $role->only(['name', 'title']));
@@ -236,7 +235,7 @@ class RolesTest extends TestCase
 
         self::actingAs($user)
             ->delete("/api/v1/roles/{$role->id}")
-            ->assertStatus(Response::HTTP_NO_CONTENT);
+            ->assertNoContent();
 
         // Ensure the role no longer exists after
         self::assertDatabaseMissing('roles', $role->toArray());
@@ -249,7 +248,7 @@ class RolesTest extends TestCase
         $role = $this->roles->random();
 
         self::delete("/api/v1/roles/{$role->id}")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
 
         // Ensure the role still exists
         self::assertDatabaseHas('roles', $role->toArray());

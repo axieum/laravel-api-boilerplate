@@ -47,7 +47,7 @@ class UsersTest extends TestCase
 
         self::actingAs($user)
             ->get("/api/v1/users?page[size]=${perPage}")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [
                     [
@@ -83,7 +83,7 @@ class UsersTest extends TestCase
         // Request verified users
         self::actingAs($user)
             ->get("/api/v1/users?filter[verified]=true")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [
                     [
@@ -113,7 +113,7 @@ class UsersTest extends TestCase
         // Request unverified users
         self::actingAs($user)
             ->get("/api/v1/users?filter[verified]=false")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [
                     [
@@ -142,7 +142,7 @@ class UsersTest extends TestCase
     /** @test */
     public function cannot_index_users_without_ability()
     {
-        self::get('/api/v1/users')->assertStatus(Response::HTTP_FORBIDDEN);
+        self::get('/api/v1/users')->assertForbidden();
     }
 
     /** @test */
@@ -154,7 +154,7 @@ class UsersTest extends TestCase
 
         self::actingAs($active)
             ->get("/api/v1/users/{$passive->id}")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'id',
                 'name',
@@ -180,7 +180,7 @@ class UsersTest extends TestCase
 
         self::actingAs($active)
             ->get("/api/v1/users/{$passive->id}")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'id',
                 'name',
@@ -203,7 +203,7 @@ class UsersTest extends TestCase
 
         self::actingAs($user)
             ->get('/api/v1/users/me')
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'id',
                 'name',
@@ -234,7 +234,7 @@ class UsersTest extends TestCase
         // Delete the user
         self::actingAs($active)
             ->delete("/api/v1/users/{$passive->id}")
-            ->assertStatus(Response::HTTP_NO_CONTENT);
+            ->assertNoContent();
 
         // Passive user does not exist in the database
         self::assertDatabaseMissing('users', $passive->only(['id', 'name', 'email']));
@@ -252,7 +252,7 @@ class UsersTest extends TestCase
         // Delete the user
         self::actingAs($user)
             ->delete("/api/v1/users/{$user->id}")
-            ->assertStatus(Response::HTTP_NO_CONTENT);
+            ->assertNoContent();
 
         // Passive user does not exist in the database
         self::assertDatabaseMissing('users', $user->only(['id', 'name', 'email']));
@@ -271,7 +271,7 @@ class UsersTest extends TestCase
         // Delete the user
         self::actingAs($active)
             ->delete("/api/v1/users/{$passive->id}")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
 
         // Passive user still exists in the database
         self::assertDatabaseHas('users', $passive->only(['id', 'name', 'email']));
@@ -294,7 +294,7 @@ class UsersTest extends TestCase
 
         self::actingAs($user)
             ->post('/api/v1/users', $data)
-            ->assertStatus(Response::HTTP_CREATED)
+            ->assertCreated()
             ->assertJsonStructure([
                 'message',
                 'user' => [
@@ -340,7 +340,7 @@ class UsersTest extends TestCase
 
         self::actingAs($user)
             ->post('/api/v1/users', $data)
-            ->assertStatus(Response::HTTP_CREATED)
+            ->assertCreated()
             ->assertJsonStructure([
                 'message',
                 'user' => [
@@ -396,7 +396,7 @@ class UsersTest extends TestCase
 
         self::actingAs($user)
             ->post('/api/v1/users', $data)
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
 
         // Assert that the database does not have the new user
         self::assertDatabaseMissing('users', [
@@ -456,7 +456,7 @@ class UsersTest extends TestCase
 
         self::actingAs($active)
             ->patch("/api/v1/users/{$passive->id}", $data)
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'message',
                 'user' => [
@@ -496,7 +496,7 @@ class UsersTest extends TestCase
 
         self::actingAs($user)
             ->patch("/api/v1/users/{$user->id}", $data)
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'message',
                 'user' => [
@@ -539,7 +539,7 @@ class UsersTest extends TestCase
 
         self::actingAs($active)
             ->patch("/api/v1/users/{$passive->id}", $data)
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'message',
                 'user' => [
@@ -588,7 +588,7 @@ class UsersTest extends TestCase
 
         self::actingAs($active)
             ->patch("/api/v1/users/{$passive->id}", $data)
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'message',
                 'user' => [
@@ -669,7 +669,7 @@ class UsersTest extends TestCase
 
         self::actingAs($active)
             ->patch("/api/v1/users/{$passive->id}", $data)
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
 
         // Ensure the new details did not persist
         $passive->refresh();

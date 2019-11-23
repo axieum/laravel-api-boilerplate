@@ -26,7 +26,7 @@ class EmailVerificationTest extends TestCase
         // Resend verification email
         self::actingAs($user)
             ->post('/api/v1/auth/verify/resend')
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure(['message', 'resent'])
             ->assertJson([
                 'message' => __('auth.verification.resent'),
@@ -72,7 +72,7 @@ class EmailVerificationTest extends TestCase
         Notification::fake();
 
         // Resend verification email
-        self::actingAs($user)->post('/api/v1/auth/verify/resend')->assertStatus(Response::HTTP_OK);
+        self::actingAs($user)->post('/api/v1/auth/verify/resend')->assertOk();
 
         // Intercept the notification and extract the verification url, then
         // try to use the url to verify the user
@@ -91,7 +91,7 @@ class EmailVerificationTest extends TestCase
                 // Attempt to use the URL to verify the user
                 self::actingAs($user)
                     ->get($url[0])
-                    ->assertStatus(Response::HTTP_OK)
+                    ->assertOk()
                     ->assertJsonStructure(['message', 'verified'])
                     ->assertJson([
                         'message' => __('auth.verification.verified'),
@@ -116,7 +116,7 @@ class EmailVerificationTest extends TestCase
         Notification::fake();
 
         // Resend verification email
-        self::actingAs($user)->post('/api/v1/auth/verify/resend')->assertStatus(Response::HTTP_OK);
+        self::actingAs($user)->post('/api/v1/auth/verify/resend')->assertOk();
 
         // Intercept the notification and extract the verification url, then
         // try to use the url to verify the user

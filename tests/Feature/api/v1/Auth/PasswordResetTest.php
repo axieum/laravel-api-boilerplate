@@ -29,7 +29,7 @@ class PasswordResetTest extends TestCase
 
         // Request password reset email
         self::post("/api/v1/auth/password/email?email={$user->email}")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure(['message', 'sent'])
             ->assertJson([
                 'message' => __(PasswordBroker::RESET_LINK_SENT),
@@ -48,7 +48,7 @@ class PasswordResetTest extends TestCase
 
         // Request password reset email
         self::post("/api/v1/auth/password/email?email={$this->faker->unique()->safeEmail}")
-            ->assertStatus(Response::HTTP_NOT_FOUND)
+            ->assertNotFound()
             ->assertJsonStructure(['message', 'sent', 'errors' => ['email']])
             ->assertJson([
                 'message' => __(PasswordBroker::INVALID_USER),
@@ -70,7 +70,7 @@ class PasswordResetTest extends TestCase
         Notification::fake();
 
         // Request password reset email
-        self::post("/api/v1/auth/password/email?email={$user->email}")->assertStatus(Response::HTTP_OK);
+        self::post("/api/v1/auth/password/email?email={$user->email}")->assertOk();
 
         // Intercept the notification and extract the verification url, then
         // try to use the url to reset the password for the user
@@ -91,7 +91,7 @@ class PasswordResetTest extends TestCase
                 ];
 
                 self::post('/api/v1/auth/password/reset', $data)
-                    ->assertStatus(Response::HTTP_OK)
+                    ->assertOk()
                     ->assertJsonStructure(['message', 'reset'])
                     ->assertJson([
                         'message' => __(PasswordBroker::PASSWORD_RESET),
@@ -146,7 +146,7 @@ class PasswordResetTest extends TestCase
         Config::set('auth.passwords.users.expire', 0);
 
         // Request password reset email
-        self::post("/api/v1/auth/password/email?email={$user->email}")->assertStatus(Response::HTTP_OK);
+        self::post("/api/v1/auth/password/email?email={$user->email}")->assertOk();
 
         // Intercept the notification and extract the verification url, then
         // try to use the url to reset the password for the user

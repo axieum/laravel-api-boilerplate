@@ -5,7 +5,6 @@ namespace Tests\Feature\api\v1\Abilities;
 use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Http\Response;
 use Silber\Bouncer\Database\Ability;
 use Tests\TestCase;
 
@@ -31,7 +30,7 @@ class AbilityUsersTest extends TestCase
 
         self::actingAs($active)
             ->get("/api/v1/abilities/{$ability->id}/users")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [[
                     'id',
@@ -54,6 +53,6 @@ class AbilityUsersTest extends TestCase
 
         self::actingAs($user)
             ->get("/api/v1/abilities/{$ability->id}/users")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
     }
 }

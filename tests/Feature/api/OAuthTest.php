@@ -5,7 +5,6 @@ namespace Tests\Feature\api;
 use App\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\Client as PassportClient;
 use Tests\TestCase;
@@ -58,7 +57,7 @@ class OAuthTest extends TestCase
 
         // Attempt to retrieve an access token via the password grant
         $res = self::post('/oauth/token', $data)
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'token_type',
                 'expires_in',
@@ -70,7 +69,7 @@ class OAuthTest extends TestCase
         self::get('/api/v1/users/me', [
             'Authorization' => "{$res->json('token_type')} {$res->json('access_token')}"
         ])
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'id',
                 'name',
@@ -99,7 +98,7 @@ class OAuthTest extends TestCase
 
         // Attempt to retrieve an access token via the password grant
         $res = self::post('/oauth/token', $data)
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'token_type',
                 'expires_in',
@@ -116,7 +115,7 @@ class OAuthTest extends TestCase
 
         // Refresh the token
         $ref = self::post('/oauth/token', $data)
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'token_type',
                 'expires_in',
@@ -131,7 +130,7 @@ class OAuthTest extends TestCase
         self::get('/api/v1/users/me', [
             'Authorization' => "{$ref->json('token_type')} {$ref->json('access_token')}"
         ])
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'id',
                 'name',

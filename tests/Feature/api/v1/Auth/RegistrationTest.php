@@ -24,7 +24,7 @@ class RegistrationTest extends TestCase
         ];
 
         self::post('/api/v1/auth/register', $data)
-            ->assertStatus(Response::HTTP_CREATED)
+            ->assertCreated()
             ->assertJsonStructure(['message', 'user' => ['name', 'email', 'email_verified_at']])
             ->assertJson([
                 'user' => [

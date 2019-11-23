@@ -6,7 +6,6 @@ use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Http\Response;
 use Silber\Bouncer\Database\Role;
 use Tests\TestCase;
 
@@ -45,7 +44,7 @@ class UserRolesTest extends TestCase
         // Request passive user's roles
         self::actingAs($active)
             ->get("/api/v1/users/{$passive->id}/roles")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [[
                     'id',
@@ -71,7 +70,7 @@ class UserRolesTest extends TestCase
         // Request passive user's roles
         self::actingAs($user)
             ->get("/api/v1/users/{$user->id}/roles")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [[
                     'id',
@@ -96,7 +95,7 @@ class UserRolesTest extends TestCase
 
         self::actingAs($active)
             ->get("/api/v1/users/{$passive->id}/roles")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
     }
 
     /** @test */
@@ -117,7 +116,7 @@ class UserRolesTest extends TestCase
 
         self::actingAs($active)
             ->put("/api/v1/users/{$passive->id}/roles/{$role->id}")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('users.assigned')]);
 
@@ -139,7 +138,7 @@ class UserRolesTest extends TestCase
 
         self::actingAs($user)
             ->put("/api/v1/users/{$user->id}/roles/{$role->id}")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
 
         // Ensure the user does not inherit the role still
         self::assertTrue($user->isNotA($role));
@@ -164,7 +163,7 @@ class UserRolesTest extends TestCase
 
         self::actingAs($active)
             ->delete("/api/v1/users/{$passive->id}/roles/{$role->id}")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('users.retracted')]);
 
@@ -187,7 +186,7 @@ class UserRolesTest extends TestCase
 
         self::actingAs($user)
             ->delete("/api/v1/users/{$user->id}/roles/{$role->id}")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
 
         // Ensure the user still inherits the role
         self::assertTrue($user->isA($role));

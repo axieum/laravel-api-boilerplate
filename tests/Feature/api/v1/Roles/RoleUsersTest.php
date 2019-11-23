@@ -5,7 +5,6 @@ namespace Tests\Feature\api\v1\Roles;
 use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Http\Response;
 use Silber\Bouncer\Database\Role;
 use Tests\TestCase;
 
@@ -31,7 +30,7 @@ class RoleUsersTest extends TestCase
 
         self::actingAs($active)
             ->get("/api/v1/roles/{$role->id}/users")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [[
                     'id',
@@ -54,7 +53,7 @@ class RoleUsersTest extends TestCase
 
         self::actingAs($user)
             ->get("/api/v1/roles/{$role->id}/users")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
     }
 
     /** @test */
@@ -75,7 +74,7 @@ class RoleUsersTest extends TestCase
 
         self::actingAs($active)
             ->put("/api/v1/roles/{$role->id}/users/{$passive->id}")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('roles.assigned')]);
 
@@ -98,7 +97,7 @@ class RoleUsersTest extends TestCase
 
         self::actingAs($active)
             ->put("/api/v1/roles/{$role->id}/users/{$passive->id}")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
 
         // Ensure the user still does not inherit the role post test
         self::assertTrue($passive->isNotA($role));
@@ -123,7 +122,7 @@ class RoleUsersTest extends TestCase
 
         self::actingAs($active)
             ->delete("/api/v1/roles/{$role->id}/users/{$passive->id}")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('roles.retracted')]);
 
@@ -148,7 +147,7 @@ class RoleUsersTest extends TestCase
 
         self::actingAs($active)
             ->delete("/api/v1/roles/{$role->id}/users/{$passive->id}")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
 
         // Ensure the user still inherits the role post test
         self::assertTrue($passive->isA($role));

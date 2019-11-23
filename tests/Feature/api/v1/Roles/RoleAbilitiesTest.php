@@ -5,7 +5,6 @@ namespace Tests\Feature\api\v1\Roles;
 use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Http\Response;
 use Silber\Bouncer\Database\Ability;
 use Silber\Bouncer\Database\Role;
 use Tests\TestCase;
@@ -32,7 +31,7 @@ class RoleAbilitiesTest extends TestCase
 
         self::actingAs($user)
             ->get("/api/v1/roles/{$role->id}/abilities")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [[
                     'id',
@@ -60,7 +59,7 @@ class RoleAbilitiesTest extends TestCase
 
         self::actingAs($user)
             ->get("/api/v1/roles/{$role->id}/abilities")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
     }
 
     /** @test */
@@ -82,7 +81,7 @@ class RoleAbilitiesTest extends TestCase
 
         self::actingAs($user)
             ->put("/api/v1/roles/{$role->id}/abilities/{$ability->id}")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('roles.allowed')]);
 
@@ -107,7 +106,7 @@ class RoleAbilitiesTest extends TestCase
 
         self::actingAs($user)
             ->put("/api/v1/roles/{$role->id}/abilities/{$ability->id}")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
 
         // Ensure the role still does not have access to the ability post test
         self::assertFalse($role->abilities()->where('ability_id', $ability->id)->exists());
@@ -133,7 +132,7 @@ class RoleAbilitiesTest extends TestCase
 
         self::actingAs($user)
             ->delete("/api/v1/roles/{$role->id}/abilities/{$ability->id}")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('roles.disallowed')]);
 
@@ -159,7 +158,7 @@ class RoleAbilitiesTest extends TestCase
 
         self::actingAs($user)
             ->delete("/api/v1/roles/{$role->id}/abilities/{$ability->id}")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
 
         // Ensure the role still has access to the ability post test
         self::assertTrue($role->abilities()->where('ability_id', $ability->id)->exists());

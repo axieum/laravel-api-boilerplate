@@ -6,7 +6,6 @@ use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Http\Response;
 use Silber\Bouncer\BouncerFacade as Bouncer;
 use Silber\Bouncer\Database\Ability;
 use Tests\TestCase;
@@ -46,7 +45,7 @@ class UserAbilitiesTest extends TestCase
         // Request passive user's abilities
         self::actingAs($active)
             ->get("/api/v1/users/{$passive->id}/abilities")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [[
                     'id',
@@ -80,7 +79,7 @@ class UserAbilitiesTest extends TestCase
         // Request passive user's forbidden abilities
         self::actingAs($active)
             ->get("/api/v1/users/{$passive->id}/abilities?filter[forbidden]=true")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [[
                     'id',
@@ -108,7 +107,7 @@ class UserAbilitiesTest extends TestCase
         // Request passive user's abilities
         self::actingAs($user)
             ->get("/api/v1/users/{$user->id}/abilities")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [[
                     'id',
@@ -134,7 +133,7 @@ class UserAbilitiesTest extends TestCase
 
         self::actingAs($active)
             ->get("/api/v1/users/{$passive->id}/abilities")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
     }
 
     /** @test */
@@ -155,7 +154,7 @@ class UserAbilitiesTest extends TestCase
 
         self::actingAs($active)
             ->put("/api/v1/users/{$passive->id}/abilities/{$ability->id}")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('users.allowed')]);
 
@@ -182,7 +181,7 @@ class UserAbilitiesTest extends TestCase
 
         self::actingAs($active)
             ->put("/api/v1/users/{$passive->id}/abilities/{$ability->id}", ['forbid' => true])
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('users.forbid')]);
 
@@ -204,7 +203,7 @@ class UserAbilitiesTest extends TestCase
 
         self::actingAs($user)
             ->put("/api/v1/users/{$user->id}/abilities/{$ability->id}")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
 
         // Ensure the user does not inherit the ability still
         self::assertTrue($user->cannot($ability->name));
@@ -229,7 +228,7 @@ class UserAbilitiesTest extends TestCase
 
         self::actingAs($active)
             ->delete("/api/v1/users/{$passive->id}/abilities/{$ability->id}")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure(['message'])
             ->assertJson(['message' => __('users.disallowed')]);
 
@@ -252,7 +251,7 @@ class UserAbilitiesTest extends TestCase
 
         self::actingAs($user)
             ->delete("/api/v1/users/{$user->id}/abilities/{$ability->id}")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
 
         // Ensure the user still inherits the ability
         self::assertTrue($user->can($ability->name));

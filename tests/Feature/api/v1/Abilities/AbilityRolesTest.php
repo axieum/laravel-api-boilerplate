@@ -5,7 +5,6 @@ namespace Tests\Feature\api\v1\Abilities;
 use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Http\Response;
 use Silber\Bouncer\Database\Ability;
 use Silber\Bouncer\Database\Role;
 use Tests\TestCase;
@@ -32,7 +31,7 @@ class AbilityRolesTest extends TestCase
 
         self::actingAs($user)
             ->get("/api/v1/abilities/{$ability->id}/roles")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [[
                     'id',
@@ -60,6 +59,6 @@ class AbilityRolesTest extends TestCase
 
         self::actingAs($user)
             ->get("/api/v1/abilities/{$ability->id}/roles")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
     }
 }

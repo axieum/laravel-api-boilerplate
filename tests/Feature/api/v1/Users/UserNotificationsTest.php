@@ -8,7 +8,6 @@ use App\Notifications\v1\SimpleNotification;
 use App\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Http\Response;
 use Illuminate\Notifications\DatabaseNotification;
 use Tests\TestCase;
 
@@ -57,7 +56,7 @@ class UserNotificationsTest extends TestCase
         // Request notifications
         self::actingAs($active)
             ->get("/api/v1/users/{$this->passive->id}/notifications?page[size]=${perPage}")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [
                     [
@@ -98,7 +97,7 @@ class UserNotificationsTest extends TestCase
         // Request read notifications
         self::actingAs($active)
             ->get("/api/v1/users/{$this->passive->id}/notifications?filter[read]=true")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [[]],
                 'links' => [],
@@ -110,7 +109,7 @@ class UserNotificationsTest extends TestCase
         // Request unread notifications
         self::actingAs($active)
             ->get("/api/v1/users/{$this->passive->id}/notifications?filter[read]=false")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [[]],
                 'links' => [],
@@ -128,7 +127,7 @@ class UserNotificationsTest extends TestCase
         // Request notifications
         self::actingAs($this->passive)
             ->get("/api/v1/users/{$this->passive->id}/notifications")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJson(['meta' => ['total' => $this->count]]);
     }
 
@@ -140,7 +139,7 @@ class UserNotificationsTest extends TestCase
 
         self::actingAs($active)
             ->get("/api/v1/users/{$this->passive->id}/notifications")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
     }
 
     /** @test */
@@ -155,7 +154,7 @@ class UserNotificationsTest extends TestCase
 
         self::actingAs($active)
             ->get("/api/v1/users/{$this->passive->id}/notifications/{$notification->getKey()}")
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure([
                 'id',
                 'type',
@@ -181,7 +180,7 @@ class UserNotificationsTest extends TestCase
 
         self::actingAs($this->passive)
             ->get("/api/v1/users/{$this->passive->id}/notifications/{$notification->getKey()}")
-            ->assertStatus(Response::HTTP_OK);
+            ->assertOk();
     }
 
     /** @test */
@@ -195,7 +194,7 @@ class UserNotificationsTest extends TestCase
 
         self::actingAs($active)
             ->get("/api/v1/users/{$this->passive->id}/notifications/{$notification->getKey()}")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
     }
 
     /** @test */
@@ -210,7 +209,7 @@ class UserNotificationsTest extends TestCase
 
         self::actingAs($active)
             ->delete("/api/v1/users/{$this->passive->id}/notifications/{$notification->getKey()}")
-            ->assertStatus(Response::HTTP_NO_CONTENT);
+            ->assertNoContent();
 
         // Ensure the notification does not exist
         self::assertDatabaseMissing('notifications', $notification->only(['id', 'notifiable_id']));
@@ -224,7 +223,7 @@ class UserNotificationsTest extends TestCase
 
         self::actingAs($this->passive)
             ->delete("/api/v1/users/{$this->passive->id}/notifications/{$notification->getKey()}")
-            ->assertStatus(Response::HTTP_NO_CONTENT);
+            ->assertNoContent();
 
         // Ensure the notification does not exist
         self::assertDatabaseMissing('notifications', $notification->only(['id', 'notifiable_id']));
@@ -241,7 +240,7 @@ class UserNotificationsTest extends TestCase
 
         self::actingAs($active)
             ->delete("/api/v1/users/{$this->passive->id}/notifications/{$notification->getKey()}")
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
 
         // Ensure the notification still exists
         self::assertDatabaseHas('notifications', $notification->only(['id', 'notifiable_id']));
@@ -263,7 +262,7 @@ class UserNotificationsTest extends TestCase
 
         self::actingAs($active)
             ->patch("/api/v1/users/{$this->passive->id}/notifications/{$notification->getKey()}", $data)
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure(['message', 'read'])
             ->assertJson([
                 'message' => __('notifications.' . $data['read'] ? 'read' : 'unread'),
@@ -286,7 +285,7 @@ class UserNotificationsTest extends TestCase
 
         self::actingAs($this->passive)
             ->patch("/api/v1/users/{$this->passive->id}/notifications/{$notification->getKey()}", $data)
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertJsonStructure(['message', 'read'])
             ->assertJson([
                 'message' => __('notifications.' . $data['read'] ? 'read' : 'unread'),
@@ -312,7 +311,7 @@ class UserNotificationsTest extends TestCase
 
         self::actingAs($active)
             ->patch("/api/v1/users/{$this->passive->id}/notifications/{$notification->getKey()}", $data)
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
 
         // Ensure read status did not change
         self::assertNotEquals($data['read'], $notification->refresh()->read());
